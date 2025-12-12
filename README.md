@@ -21,7 +21,9 @@
 
 ### 运行 *boring*
 
-*boring* 的配置文件 conf.yaml 如下所示
+1. 创建一个sqlite数据库文件，并使用init.sql初始化表
+
+2. 创建*boring*运行的配置文件， conf.yaml如下所示
 ``` yaml
 db:
  type: sqlite
