@@ -1,5 +1,2 @@
-# 0.1.0 / 2025-12-09
+# 0.1.0 / 2025-12-12
 ## release v0.1.0
-* [FEATURE]
-* [BUGFIX]
-* [ENHANCEMENT]
