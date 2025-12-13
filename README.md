@@ -58,13 +58,12 @@ cd ./web && npm run build
 
 ## 3. 使用手册
 
-### * 配置普米
+### 配置普米
 点击新增或修改按钮, 添加prometheus的访问地址、控制地址(boring-agent访问地址)、用户名、密码等
 >*ps*: 规则由规则配置页面设置后，自动生成
 ![](doc/prom_modify.png)
 
-
-### * 配置规则
+### 配置规则
 点击新增或修改按钮，完成告警规则设置后，点击提交按钮使规则在对应的普米生效
 ![](doc/rule_modify.png)
 ![](doc/rule.png)
