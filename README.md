@@ -1,5 +1,5 @@
 # Boring
-轻量、简洁、灵活部署的Prometheus管理系统，提供统一的Web页面进行告警规则配置
+轻量、简洁、灵活的Prometheus管理系统，提供统一的Web操作页面，可管理多个promtheus配置和告警规则设置
 
 ## 1. 架构图
 ![图的描述性文字](doc/design.svg)
