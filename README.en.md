@@ -1,10 +1,10 @@
 # Boring
-**Boring** is a lightweight alerting system built on Prometheus. It centralizes management of Prometheus services distributed across different locations and supports scheduled SQL and HTTP data collection.
+**Boring** is a lightweight alerting system built on Prometheus. It centralizes management of Prometheus services distributed across different locations and supports scheduled SQL data collection.
 
 # Features
 - Manage multiple Prometheus service configurations
 - Graphical alert rule configuration
-- Periodic SQL and HTTP data collection
+- Periodic SQL data collection
 
 # Architecture
 ![Architecture](doc/design.png)
@@ -65,7 +65,8 @@ npm run dev
 
 ### Manage Prometheus instances
 - In the management UI, add or edit a Prometheus instance and provide the access address, control address (the address `boring-agent` listens on), username/password, and other details.
-- Alert rules are created via the rule configuration page and will be synchronized to the corresponding Prometheus instances after submission.
+- Rules are created via the alert rule configuration page and will be synchronized to the corresponding Prometheus instances after submission.
+
 ![](doc/prom.png)
 
 ### Manage alert rules
