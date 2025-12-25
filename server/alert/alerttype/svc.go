@@ -148,13 +148,12 @@ func (*AlertTypeService) Modify(c *gin.Context) {
 		return
 	}
 
-	updates := make(map[string]interface{})
-	updates["name"] = req.Name
-	updates["code"] = req.Code
+	config.Name = req.Name
+	config.Code = req.Code
 
 	if err := gormDB.WithContext(ctx).Model(&table.TAlertType{}).
 		Where("id = ?", req.ID).
-		Updates(updates).Error; err != nil {
+		Updates(config).Error; err != nil {
 		response.ErrorWithMsg(c, fmt.Sprintf("更新 t_alert_type 配置失败: %v", err))
 		return
 	}

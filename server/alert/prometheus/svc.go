@@ -12,7 +12,32 @@ import (
 	"github.com/qwganker/boring/storage"
 )
 
-func ListAllPrometheusConfig(c *gin.Context) {
+type PrometheusService struct {
+}
+
+func QueryPrometheusConfigByID(ctx context.Context, id int64) (*table.TPrometheusConfig, error) {
+	gormDB := storage.GetDBInstance()
+
+	var config table.TPrometheusConfig
+	if err := gormDB.WithContext(ctx).First(&config, id).Error; err != nil {
+		return nil, fmt.Errorf("查询 Prometheus 配置失败: %v", err)
+	}
+
+	return &config, nil
+}
+
+func (p *PrometheusService) QueryPrometheusConfigByID(ctx context.Context, id int64) (*table.TPrometheusConfig, error) {
+	gormDB := storage.GetDBInstance()
+
+	var config table.TPrometheusConfig
+	if err := gormDB.WithContext(ctx).First(&config, id).Error; err != nil {
+		return nil, fmt.Errorf("查询 Prometheus 配置失败: %v", err)
+	}
+
+	return &config, nil
+}
+
+func (p *PrometheusService) ListAllPrometheusConfig(c *gin.Context) {
 	ctx := c.Request.Context()
 	if ctx == nil {
 		ctx = context.Background()
@@ -29,7 +54,7 @@ func ListAllPrometheusConfig(c *gin.Context) {
 	response.SuccessWithData(c, items)
 }
 
-func PagePrometheusConfig(c *gin.Context) {
+func (p *PrometheusService) PagePrometheusConfig(c *gin.Context) {
 	var req PrometheusConfigPageReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
 		response.InvalidParams(c, err.Error())
@@ -74,7 +99,7 @@ func PagePrometheusConfig(c *gin.Context) {
 
 	var cfgWithStatus []PrometheusConfigWithStatus
 	for _, cfg := range cfgs {
-		if err := checkStatus(c, cfg); err == nil {
+		if err := p.checkStatus(c, cfg); err == nil {
 			cfgWithStatus = append(cfgWithStatus, PrometheusConfigWithStatus{
 				TPrometheusConfig: cfg,
 				Status:            "Normal",
@@ -92,7 +117,7 @@ func PagePrometheusConfig(c *gin.Context) {
 	response.SuccessWithData(c, request.NewPageResult(req.PageRequest, total, cfgWithStatus))
 }
 
-func AddPrometheusConfig(c *gin.Context) {
+func (p *PrometheusService) AddPrometheusConfig(c *gin.Context) {
 	var req PrometheusConfigAddReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
 		response.InvalidParams(c, err.Error())
@@ -125,7 +150,7 @@ func AddPrometheusConfig(c *gin.Context) {
 	response.SuccessWithMsg(c, response.MSG_SUCCESS_ADD)
 }
 
-func DeletePrometheusConfig(c *gin.Context) {
+func (p *PrometheusService) DeletePrometheusConfig(c *gin.Context) {
 	var req PrometheusConfigDeleteReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
 		response.InvalidParams(c, err.Error())
@@ -155,7 +180,7 @@ func DeletePrometheusConfig(c *gin.Context) {
 	response.SuccessWithMsg(c, response.MSG_SUCCESS_DELEETE)
 }
 
-func ModifyPrometheusConfig(c *gin.Context) {
+func (p *PrometheusService) ModifyPrometheusConfig(c *gin.Context) {
 	var req PrometheusConfigModifyReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
 		response.InvalidParams(c, err.Error())
@@ -175,19 +200,18 @@ func ModifyPrometheusConfig(c *gin.Context) {
 		return
 	}
 
-	updates := make(map[string]interface{})
-	updates["remark"] = req.Remark
-	updates["address"] = req.Address
-	updates["username"] = req.Username
-	updates["password"] = req.Password
-	updates["ctrl_address"] = req.CtrlAddress
-	updates["config"] = req.Config
-	updates["rule"] = req.Rule
-	updates["enabled"] = req.Enabled
+	config.Remark = req.Remark
+	config.Address = req.Address
+	config.Username = req.Username
+	config.Password = req.Password
+	config.CtrlAddress = req.CtrlAddress
+	config.Config = req.Config
+	config.Rule = req.Rule
+	config.Enabled = req.Enabled
 
 	if err := gormDB.WithContext(ctx).Model(&table.TPrometheusConfig{}).
 		Where("id = ?", req.ID).
-		Updates(updates).Error; err != nil {
+		Updates(config).Error; err != nil {
 		response.ErrorWithMsg(c, fmt.Sprintf("更新 Prometheus 配置失败: %v", err))
 		return
 	}
@@ -195,7 +219,7 @@ func ModifyPrometheusConfig(c *gin.Context) {
 	response.SuccessWithMsg(c, response.MSG_SUCCESS_MODIFY)
 }
 
-func CopyPrometheusConfig(c *gin.Context) {
+func (p *PrometheusService) CopyPrometheusConfig(c *gin.Context) {
 	var req PrometheusConfigCopyReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
 		response.InvalidParams(c, err.Error())
@@ -221,8 +245,8 @@ func CopyPrometheusConfig(c *gin.Context) {
 		Username:    cfg.Username,
 		Password:    cfg.Password,
 		CtrlAddress: cfg.CtrlAddress,
-		Config:      cfg.Config,
-		Rule:        cfg.Rule,
+		Config:      "",
+		Rule:        "",
 		Enabled:     constant.Disabled,
 	}
 
@@ -234,7 +258,7 @@ func CopyPrometheusConfig(c *gin.Context) {
 	response.SuccessWithMsg(c, response.MSG_SUCCESS_COPY)
 }
 
-func SumbitPrometheusConfig(c *gin.Context) {
+func (p *PrometheusService) SumbitPrometheusConfig(c *gin.Context) {
 	var req PrometheusConfigSumbitReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
 		response.InvalidParams(c, err.Error())
@@ -274,7 +298,7 @@ func SumbitPrometheusConfig(c *gin.Context) {
 	response.SuccessWithMsg(c, response.MSG_SUCCESS_SUBMIT)
 }
 
-func CheckPrometheusStatus(c *gin.Context) {
+func (p *PrometheusService) CheckPrometheusStatus(c *gin.Context) {
 	var req CheckPrometheusStatusReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
 		response.InvalidParams(c, err.Error())
@@ -294,7 +318,7 @@ func CheckPrometheusStatus(c *gin.Context) {
 		return
 	}
 
-	err := checkStatus(c, config)
+	err := p.checkStatus(c, config)
 	if err != nil {
 		response.ErrorWithMsg(c, fmt.Sprintf("Prometheus 状态异常: %v", err))
 		return
@@ -303,7 +327,7 @@ func CheckPrometheusStatus(c *gin.Context) {
 	response.SuccessWithMsg(c, "")
 }
 
-func checkStatus(c *gin.Context, config table.TPrometheusConfig) error {
+func (p *PrometheusService) checkStatus(c *gin.Context, config table.TPrometheusConfig) error {
 	ctrl := NewPrometheusCtrl(c)
 
 	if err := ctrl.CheckPrometheusStatus(&config); err != nil {

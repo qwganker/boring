@@ -12,7 +12,6 @@ import (
 type DBConfig struct {
 	Type string `yaml:"type"`
 	DSN  string `yaml:"dsn"`
-	Path string `yaml:"path"`
 }
 
 // ServerConfig 描述 server 段配置
@@ -21,10 +20,17 @@ type ServerConfig struct {
 	Host string `yaml:"host"`
 }
 
+type JobWorkerConfig struct {
+	Port int    `yaml:"port"`
+	Host string `yaml:"host"`
+}
+
 // Config 对应整个 conf.yaml
 type Config struct {
-	DB     DBConfig     `yaml:"db"`
-	Server ServerConfig `yaml:"server"`
+	DB               DBConfig        `yaml:"db"`
+	Server           ServerConfig    `yaml:"server"`
+	JobWorkerAddress string          `yaml:"job_worker_address"`
+	JobWorkerConfig  JobWorkerConfig `yaml:"job_worker"`
 }
 
 var config Config

@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/qwganker/boring/comm"
 )
 
 var (
@@ -14,8 +15,12 @@ var (
 	ruleConfigFilePath       *string
 )
 
+var GinMode = gin.DebugMode
+
 func main() {
-	gin.SetMode(gin.ReleaseMode)
+	if GinMode == gin.ReleaseMode {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	port := flag.Int("port", 7767, "specify the listening port")
 	webConfigFilePath = flag.String("web.config.file", "./web-config.yml", "path to web config file")
@@ -37,7 +42,8 @@ func main() {
 
 	address := fmt.Sprintf("0.0.0.0:%d", *port)
 
-	log.Println("Listening and serving HTTP on " + address)
+	log.Printf("Boring-agent %s listening on %s\n", comm.BoringVersion, address)
+
 	err = r.Run(address)
 	if err != nil {
 		panic(err)

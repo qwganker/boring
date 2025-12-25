@@ -4,13 +4,14 @@
       <el-button type="primary" @click="onAddAlertRule">新增</el-button>
       <el-button type="primary" @click="onRefresh" v-loading="tableLoading">刷新</el-button>
     </el-space>
-    <el-card >
+    <el-card>
       <el-table border size="small" :data="alertRuleTableData" v-loading="tableLoading" style="width:100%">
         <el-table-column prop="ID" label="ID" width="60" />
         <el-table-column label="告警普米" width="140">
           <template #default="{ row }">
-            <el-tag type="info" v-if="row.PrometheusConfig != undefined">{{ row.PrometheusConfig ? row.PrometheusConfig.Remark : '已删除' }}</el-tag>
-            <el-tag type="danger" v-else>已删除普米</el-tag>
+            <div v-for="cfg in PrometheusConfigList">
+              <el-tag type="info" v-if="cfg.ID === row.PrometheusConfigID">{{ cfg.Remark }}</el-tag>
+            </div>
           </template>
         </el-table-column>
         <el-table-column prop="Type" label="告警类型" width="120" />
@@ -29,7 +30,7 @@
             <el-tag type="danger" v-else>否</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="UpdatedAt" label="更新时间" width="140"/>
+        <el-table-column prop="UpdatedAt" label="更新时间" width="140" />
         <el-table-column label="操作" fixed="right" width="260">
           <template #default="{ row }">
             <el-button type="primary" size="small" @click="onModify(row)">修改</el-button>
@@ -41,7 +42,7 @@
               <template #reference>
                 <el-button type="danger" size="small" style="margin-left:8px">删除</el-button>
               </template>
-            </el-popconfirm>  
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>

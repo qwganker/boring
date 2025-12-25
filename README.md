@@ -1,72 +1,94 @@
 # Boring
-轻量、简洁、灵活的Prometheus管理系统，提供统一的Web操作页面，可管理多个promtheus配置和告警规则设置
+**Boring** 是基于 Prometheus 的轻量级告警系统。可统一管理分散在不同地方的 Prometheus 服务，并支持定时SQL和HTTP采集
 
-## 1. 架构图
-![图的描述性文字](doc/design.svg)
+# 功能项
+- 管理多 Prometheus 服务配置
+- 图形化配置告警规则
+- 定时采集 SQL、HTTP 数据
 
-### *boring*
-1. 管理的核心程序，负责Prometheus的配置，并下发指令到boring-agent
-### *boring-agent*
-1. 用于重写其配置文件和规则文件
-2. 执行prometheus重载
+# 架构图
+![架构图](doc/design.png)
 
+- **boring-server**: 管理端核心程序，实现定时任务、告警配置、数据采集配置等
+- **boring-agent**: 部署在 Prometheus 节点上，接收 **boring-server** 下发的配置并写入文件
+- **boring-jobworker**: 接收定时器下发的采集任务，并将采集数据推送到指定 Prometheus
 
-## 2. 本地运行
+# 部署运行
 
-### 运行 *boring-agent*
-*boring-agent* 部署在prometheus的机子上
+### 编译后端
 ```
-./boring-agent --port 7767--web.config.file ~/{path}/web-config.yml --config.file ~/{path}/prometheus.yml --rule.file ~/{path}/rule.yml
+cd ./server && ./build.sh
 ```
 
-### 运行 *boring*
+### 示例 `conf.yaml`:
+```yaml
+server:
+  port: 7832
+  host: 0.0.0.0
 
-1. 创建一个 sqlite 数据库文件，并使用 ./server/init.sql 初始化表
-
-2. 创建 *boring* 运行的配置文件, conf.yaml如下所示
-``` yaml
 db:
  type: sqlite
- dsn: file:boring.db?cache=shared&_pragma=foreign_keys(1)
- path: ./boring.db  #sqlite数据库文件路径
+ dsn: file:./boring.db?cache=shared&_pragma=foreign_keys(1)
 
-server:
-  port: 7832  # 监听端口
+job_worker_address: http://0.0.0.0:7855
+
+job_worker:
+  port: 7855
   host: 0.0.0.0
 ```
+
+### 1. 启动 boring-agent
 ```
-cd ./server
-go run ./cmd/server --config ./conf.yaml
+# 在部署 Prometheus 服务的主机上
+./boring-agent --port 7767 --web.config.file ~/path/web-config.yml --config.file ~/path/prometheus.yml --rule.file ~/path/rule.yml
 ```
 
-### 运行前端
+### 2. 启动 boring-jobworker
+```
+# 可使用 nginx 反向代理，部署多个实例
+./boring-jobworker --config ./conf.yaml
+```
+
+### 3. 启动 boring-server
+```
+./boring-server --config ./conf.yaml
+```
+
+### 4. 运行前端
 ```
 cd ./web
 npm install
 npm run dev
 ```
 
-### 编译后端
-```
-cd ./server && sh build.sh
-```
+# 使用说明
 
-### 编译前端
-```
-cd ./web && npm run build
-```
+### 管理 Prometheus 实例
+- 在管理界面新增或修改 Prometheus 实例，填写访问地址、控制地址(**boring-agent** 监听地址)、用户名/密码等信息
+- 告警规则通过规则配置页面创建，提交后会同步到对应的 Prometheus 实例
+![](doc/prom.png)
 
-## 3. 使用手册
-
-### 配置普米
-点击新增或修改按钮, 添加prometheus的访问地址、控制地址(boring-agent访问地址)、用户名、密码等
->*ps*: 规则由规则配置页面设置后，自动生成
-![](doc/prom_modify.png)
-
-### 配置规则
-点击新增或修改按钮，完成告警规则设置后，点击提交按钮使规则在对应的普米生效
-![](doc/rule_modify.png)
+### 管理告警规则
+告警规则使用 PromQL 标准语法
 ![](doc/rule.png)
 
+### 创建 SQL 采集任务
+指标配置示例
+```
+{
+    "name": "alert_type_count", # 存入 prometheus 的指标名
+    "help": "test",
+    "type": "GAUGE",
+    "label_keys": [             # 匹配 SQl 语句采集字段，并设置为指标标签
+        "name",
+        "code"
+    ],
+    "value_key":"count"         # 匹配 SQl 数量值，并设置为指标值
+}
+```
 
-### [CHANGELOG.md](./CHANGELOG.md)
+![](doc/sql.png)
+
+
+# CHANGELOG
+[CHANGELOG.md](./CHANGELOG.md)

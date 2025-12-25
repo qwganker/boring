@@ -1,8 +1,13 @@
-db:
- type: sqlite # 数据库类型
- dsn: file:boring.db?cache=shared&_pragma=foreign_keys(1)
- path: ./boring.db # Sqlite数据库文件的路径
-
 server:
-  port: 7832 #指定监听端口
+  port: 7832
+  host: 0.0.0.0
+
+db:
+ type: sqlite
+ dsn: file:./boring.db?cache=shared&_pragma=foreign_keys(1)
+
+job_worker_address: http://0.0.0.0:7855
+
+job_worker:
+  port: 7855
   host: 0.0.0.0

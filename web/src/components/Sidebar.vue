@@ -2,11 +2,31 @@
   <div class="sidebar-wrap" :class="{ 'is-collapsed': collapsed }">
     <div class="brand">Boring</div>
     <el-menu :default-active="active" class="el-menu-vertical-demo" @select="handleSelect" :collapse="collapsed"
-      background-color="#545c64" text-color="#fff" active-text-color="#ffd04b"
-      :default-openeds="['alert']">
-      <el-menu-item index="/portal">
-        <el-icon><Warning /></el-icon>
-        <span>首页</span></el-menu-item>
+      background-color="#545c64" text-color="#fff" active-text-color="#ffd04b" :default-openeds="['alert']">
+      <!-- <el-menu-item index="/portal">
+        <el-icon>
+          <Warning />
+        </el-icon>
+        <span>首页</span>
+      </el-menu-item> -->
+      <el-sub-menu index="job">
+        <template #title>
+          <el-icon>
+            <Timer />
+          </el-icon>
+          <span>定时任务</span>
+        </template>
+        <el-menu-item index="/job/jobtask">任务列表</el-menu-item>
+      </el-sub-menu>
+      <el-sub-menu index="collector">
+        <template #title>
+          <el-icon>
+            <Files />
+          </el-icon>
+          <span>收集器</span>
+        </template>
+        <el-menu-item index="/collector/sqltask">SQL任务</el-menu-item>
+      </el-sub-menu>
       <el-sub-menu index="alert">
         <template #title>
           <el-icon>
@@ -22,28 +42,37 @@
   </div>
 </template>
 
-<script>
-import { ref } from 'vue'
+<script lang="ts">
+import { defineComponent, ref, watch, onMounted, PropType, Ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Warning, Bell, Menu } from '@element-plus/icons-vue'
+import type { RouteLocationNormalizedLoaded } from 'vue-router'
+import { Warning, Bell, Timer, Files } from '@element-plus/icons-vue'
 
-export default {
+export default defineComponent({
   name: 'Sidebar',
-  components: { Warning, Bell },
-  props: { collapsed: { type: Boolean, default: false } },
+  components: { Warning, Bell, Timer,Files },
+  props: { collapsed: { type: Boolean as PropType<boolean>, default: false } },
   setup(props) {
-const route = useRoute()
-const router = useRouter()
-const active = ref(route.path)
+    const route = useRoute() as RouteLocationNormalizedLoaded
+    const router = useRouter()
+    const active: Ref<string> = ref(route.path)
 
-function handleSelect(key) {
-  active.value = key
-  router.push(key)
-}
+    onMounted(() => {
+      active.value = route.path
+    })
 
-return { active, handleSelect }
+    watch(() => route.path, (p: string) => {
+      active.value = p
+    })
+
+    function handleSelect(key: string): void {
+      active.value = key
+      router.push(key)
+    }
+
+    return { active, handleSelect }
   }
-}
+})
 </script>
 
 <style scoped>

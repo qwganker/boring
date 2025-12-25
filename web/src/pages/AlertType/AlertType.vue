@@ -9,7 +9,7 @@
       <el-table :data="configs" v-loading="tableLoading" size="small" border style="width:100%">
         <el-table-column prop="ID" label="ID" width="60" />
         <el-table-column prop="Name" label="名称" min-width="180" />
-        <el-table-column prop="Code" label="代码" min-width="180" />
+        <el-table-column prop="Code" label="Code" min-width="180" />
         <el-table-column prop="UpdatedAt" label="更新时间" width="140"/>
 
         <el-table-column label="操作" fixed="right" width="160">
@@ -33,7 +33,7 @@
     </el-card>
 
     <!-- Edit Drawer -->
-    <el-drawer v-model="editVisible" title="修改 Prometheus 配置" size="50%" direction="rtl">
+    <el-drawer v-model="editVisible" title="修改告警类型" size="50%" direction="rtl">
       <el-form ref="editFormRef" :model="editForm" label-width="auto">
         <el-form-item label="ID">
           <el-input v-model="editForm.ID" disabled />

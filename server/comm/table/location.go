@@ -3,6 +3,7 @@ package table
 import (
 	"database/sql/driver"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -28,4 +29,26 @@ func (t *LocalTime) Scan(v interface{}) error {
 		return nil
 	}
 	return fmt.Errorf("can not convert %v to timestamp", v)
+}
+
+// UnmarshalJSON handles JSON parsing for LocalTime.
+// It checks for empty strings and null values before attempting to parse the time.
+func (t *LocalTime) UnmarshalJSON(data []byte) error {
+	// Convert the byte slice to a string and trim quotes
+	timeStr := strings.Trim(string(data), `"`)
+
+	// Check for empty values (empty string or JSON null)
+	if timeStr == "" || timeStr == "null" {
+		// Set to zero value if empty
+		*t = LocalTime(time.Time{})
+		return nil
+	}
+
+	// Attempt to parse the time string using the expected format
+	parsedTime, err := time.ParseInLocation("2006-01-02 15:04:05", timeStr, time.Local)
+	if err != nil {
+		return err
+	}
+	*t = LocalTime(parsedTime)
+	return nil
 }

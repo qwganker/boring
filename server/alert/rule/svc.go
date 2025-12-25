@@ -13,7 +13,10 @@ import (
 	"github.com/qwganker/boring/storage"
 )
 
-func PageAlertRule(c *gin.Context) {
+type RuleService struct {
+}
+
+func (r *RuleService) PageAlertRule(c *gin.Context) {
 	var req AlertRulePageReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
 		response.InvalidParams(c, err.Error())
@@ -50,60 +53,14 @@ func PageAlertRule(c *gin.Context) {
 			return
 		}
 
-		// collect unique PrometheusConfigIDs
-		idsMap := make(map[int64]struct{})
-		var ids []int64
-		for _, it := range items {
-			if it.PrometheusConfigID != 0 {
-				if _, ok := idsMap[it.PrometheusConfigID]; !ok {
-					idsMap[it.PrometheusConfigID] = struct{}{}
-					ids = append(ids, it.PrometheusConfigID)
-				}
-			}
-		}
-
-		// query all related Prometheus configs in batch
-		cfgMap := make(map[int64]table.TPrometheusConfig)
-		if len(ids) > 0 {
-			var cfgs []table.TPrometheusConfig
-			if err := gormDB.WithContext(ctx).Model(&table.TPrometheusConfig{}).
-				Where("id IN ?", ids).
-				Find(&cfgs).Error; err != nil {
-				response.ErrorWithMsg(c, fmt.Sprintf("查询 t_prometheus_config 失败: %v", err))
-				return
-			}
-			for _, c := range cfgs {
-				cfgMap[c.ID] = c
-			}
-		}
-
-		// build response items with attached prometheus config
-		type AlertRuleWithConfig struct {
-			table.TAlertRule
-			PrometheusConfig *table.TPrometheusConfig `json:"PrometheusConfig,omitempty"`
-		}
-
-		var outItems []AlertRuleWithConfig
-		outItems = make([]AlertRuleWithConfig, 0, len(items))
-		for _, it := range items {
-			ar := AlertRuleWithConfig{TAlertRule: it}
-			if it.PrometheusConfigID != 0 {
-				if cfg, ok := cfgMap[it.PrometheusConfigID]; ok {
-					copyCfg := cfg
-					ar.PrometheusConfig = &copyCfg
-				}
-			}
-			outItems = append(outItems, ar)
-		}
-
-		response.SuccessWithData(c, request.NewPageResult(req.PageRequest, total, outItems))
+		response.SuccessWithData(c, request.NewPageResult(req.PageRequest, total, items))
 		return
 	}
 
 	response.SuccessWithData(c, request.NewPageResult(req.PageRequest, total, items))
 }
 
-func AddAlertRule(c *gin.Context) {
+func (r *RuleService) AddAlertRule(c *gin.Context) {
 	var req AlertRuleAddReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
 		response.InvalidParams(c, err.Error())
@@ -132,7 +89,7 @@ func AddAlertRule(c *gin.Context) {
 		Enabled:            req.Enabled,
 	}
 
-	if err := gormDB.WithContext(ctx).Create(&rule).Error; err != nil {
+	if err := gormDB.WithContext(ctx).Save(&rule).Error; err != nil {
 		response.ErrorWithMsg(c, fmt.Sprintf("添加告警规则失败: %v", err))
 		return
 	}
@@ -140,7 +97,7 @@ func AddAlertRule(c *gin.Context) {
 	response.SuccessWithMsg(c, response.MSG_SUCCESS_ADD)
 }
 
-func DeleteAlertRule(c *gin.Context) {
+func (r *RuleService) DeleteAlertRule(c *gin.Context) {
 	var req AlertRuleDeleteReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
 		response.InvalidParams(c, err.Error())
@@ -168,7 +125,7 @@ func DeleteAlertRule(c *gin.Context) {
 	response.SuccessWithMsg(c, response.MSG_SUCCESS_DELEETE)
 }
 
-func ModifyAlertRule(c *gin.Context) {
+func (r *RuleService) ModifyAlertRule(c *gin.Context) {
 	var req AlertRuleModifyReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
 		response.InvalidParams(c, err.Error())
@@ -188,28 +145,22 @@ func ModifyAlertRule(c *gin.Context) {
 		return
 	}
 
-	updates := make(map[string]interface{})
-	updates["title"] = req.Title
-	updates["level"] = req.Level
-	updates["type"] = req.Type
-	updates["source"] = req.Source
-	updates["promql_rule"] = req.PromQLRule
-	updates["content"] = req.Content
-	updates["for"] = req.For
-	updates["promql_query"] = req.PromQLQuery
-	updates["custom_labels"] = req.CustomLabels
-	updates["notify_id"] = req.NotifyID
-	updates["enabled"] = req.Enabled
-	updates["prometheus_config_id"] = req.PrometheusConfigID
-
-	if len(updates) == 0 {
-		response.SuccessWithMsg(c, response.MSG_SUCCESS)
-		return
-	}
+	rule.Title = req.Title
+	rule.Level = req.Level
+	rule.Type = req.Type
+	rule.Source = req.Source
+	rule.PromQLRule = req.PromQLRule
+	rule.Content = req.Content
+	rule.For = req.For
+	rule.PromQLQuery = req.PromQLQuery
+	rule.CustomLabels = req.CustomLabels
+	rule.NotifyID = req.NotifyID
+	rule.Enabled = req.Enabled
+	rule.PrometheusConfigID = req.PrometheusConfigID
 
 	if err := gormDB.WithContext(ctx).Model(&table.TAlertRule{}).
 		Where("id = ?", req.ID).
-		Updates(updates).Error; err != nil {
+		Save(rule).Error; err != nil {
 		response.ErrorWithMsg(c, fmt.Sprintf("更新告警规则失败: %v", err))
 		return
 	}
@@ -217,7 +168,7 @@ func ModifyAlertRule(c *gin.Context) {
 	response.SuccessWithMsg(c, response.MSG_SUCCESS_MODIFY)
 }
 
-func CopyAlertRule(c *gin.Context) {
+func (r *RuleService) CopyAlertRule(c *gin.Context) {
 	var req AlertRuleCopyReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
 		response.InvalidParams(c, err.Error())
@@ -260,7 +211,7 @@ func CopyAlertRule(c *gin.Context) {
 	response.SuccessWithMsg(c, response.MSG_SUCCESS_COPY)
 }
 
-func SubmitAlertRule(c *gin.Context) {
+func (r *RuleService) SubmitAlertRule(c *gin.Context) {
 	var req AlertRuleSumbitReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
 		response.InvalidParams(c, err.Error())

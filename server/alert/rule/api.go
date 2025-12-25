@@ -5,11 +5,13 @@ import (
 )
 
 func InitAPI(g *gin.RouterGroup) {
+
+	svc := RuleService{}
 	g.Group("/rule").
-		POST("/page", PageAlertRule).
-		POST("/add", AddAlertRule).
-		POST("/modify", ModifyAlertRule).
-		POST("/delete", DeleteAlertRule).
-		POST("/submit", SubmitAlertRule).
-		POST("/copy", CopyAlertRule)
+		POST("/page", svc.PageAlertRule).
+		POST("/add", svc.AddAlertRule).
+		POST("/modify", svc.ModifyAlertRule).
+		POST("/delete", svc.DeleteAlertRule).
+		POST("/submit", svc.SubmitAlertRule).
+		POST("/copy", svc.CopyAlertRule)
 }

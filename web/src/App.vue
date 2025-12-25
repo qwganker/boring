@@ -3,6 +3,7 @@
     <el-aside :width="collapsed ? '60px' : '220px'" class="app-aside" style="background-color: #545c64">
       <Sidebar :collapsed="collapsed" />
     </el-aside>
+
     <el-container>
       <el-header class="app-header">
         <el-button @click="toggleCollapse" circle>
@@ -13,6 +14,7 @@
             <Expand />
           </el-icon>
         </el-button>
+        <Breadcrumbs />
       </el-header>
 
       <el-main class="app-main">
@@ -25,11 +27,12 @@
 <script>
 import { ref, onMounted } from 'vue'
 import Sidebar from './components/Sidebar.vue'
+import Breadcrumbs from './components/Breadcrumbs.vue'
 import { Expand, Fold } from '@element-plus/icons-vue'
 
 export default {
   name: 'App',
-  components: { Sidebar, Expand, Fold },
+  components: { Sidebar, Breadcrumbs, Expand, Fold },
   setup() {
     const collapsed = ref(false)
 
@@ -56,14 +59,17 @@ export default {
   align-items: center;
   gap: 12px;
 }
+
 .header-title {
   font-weight: 600;
   font-size: 16px;
 }
+
 .app-main {
   padding: 14px;
   background: #f5f7fa;
 }
+
 .app-aside {
   transition: width 0.25s ease, background-color 0.3s ease;
   overflow: hidden;

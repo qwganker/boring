@@ -42,7 +42,7 @@
     </el-card>
 
     <!-- Edit Drawer -->
-    <el-drawer v-model="editVisible" title="修改 Prometheus 配置" size="50%" direction="rtl">
+    <el-drawer v-model="editVisible" title="修改普米配置" size="50%" direction="rtl">
       <el-form ref="editFormRef" :model="editForm" label-width="auto">
         <el-form-item label="ID">
           <el-input v-model="editForm.ID" disabled />
@@ -89,7 +89,7 @@
     </el-drawer>
 
     <!-- Add Dialog -->
-    <el-dialog v-model="addVisible" title="新增 Prometheus 配置">
+    <el-dialog v-model="addVisible" title="新增普米配置">
       <el-form ref="addFormRef" :model="addForm" label-width="auto">
         <el-form-item label="备注" prop="Remark" :rules="[{ required: true, message: '请输入备注', trigger: 'blur' }]">
           <el-input v-model="addForm.Remark" />
