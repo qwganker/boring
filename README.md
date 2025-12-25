@@ -1,10 +1,10 @@
 # Boring | [English](./README.en.md)
-**Boring** 是基于 Prometheus 的轻量级告警系统。可统一管理分散在不同地方的 Prometheus 服务，并支持定时SQL和HTTP采集
+**Boring** 是基于 Prometheus 的轻量级告警系统。可统一管理分散在不同地方的 Prometheus 服务，并支持定时SQL采集
 
 # 功能项
 - 管理多 Prometheus 服务配置
 - 图形化配置告警规则
-- 定时采集 SQL、HTTP 数据
+- 定时采集 SQL 数据
 
 # 架构图
 ![架构图](doc/design.png)
@@ -65,7 +65,8 @@ npm run dev
 
 ### 管理 Prometheus 实例
 - 在管理界面新增或修改 Prometheus 实例，填写访问地址、控制地址(**boring-agent** 监听地址)、用户名/密码等信息
-- 告警规则通过规则配置页面创建，提交后会同步到对应的 Prometheus 实例
+- 规则通过告警规则页面设置，在提交后会同步到对应的 Prometheus 实例
+
 ![](doc/prom.png)
 
 ### 管理告警规则
