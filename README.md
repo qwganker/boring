@@ -1,4 +1,4 @@
-# Boring
+# Boring | [English](./README.en.md)
 **Boring** 是基于 Prometheus 的轻量级告警系统。可统一管理分散在不同地方的 Prometheus 服务，并支持定时SQL和HTTP采集
 
 # 功能项
